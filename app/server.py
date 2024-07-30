@@ -13,7 +13,7 @@ from .custom_types import (
     ResponseRequiredRequest,
 )
 from .twilio_server import TwilioClient
-from .llm import LlmClient  # or use .llm_with_func_calling
+from .llm_with_func_calling import LlmClient  # or use .llm
 
 load_dotenv(override=True)
 app = FastAPI()
