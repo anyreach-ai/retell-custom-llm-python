@@ -1,15 +1,16 @@
-from openai import AsyncOpenAI
 import os
+import re
 import json
+from typing import List
+import shopify
+from shopify import GraphQL
+from openai import AsyncOpenAI
+from google.cloud import secretmanager
 from .custom_types import (
     ResponseRequiredRequest,
     ResponseResponse,
     Utterance,
 )
-from typing import List
-from shopify import GraphQL
-import shopify
-import re
 
 API_KEY = "13ee4c6d9d6a3531000351c939e86d00"
 API_SECRET = "d5c302967ce868ff968313edf4960760"
@@ -34,11 +35,22 @@ Personality: Your approach should be empathetic and understanding, balancing com
 """
 
 
+def get_gcloud_secret(secret_name):
+    client = secretmanager.SecretManagerServiceClient()
+    project_id = os.getenv("GOOGLE_CLOUD_PROJECT")
+    if not project_id:
+        raise ValueError(
+            "GOOGLE_CLOUD_PROJECT environment variable is not set")
+    name = f"projects/{project_id}/secrets/{secret_name}/versions/latest"
+    response = client.access_secret_version(name=name)
+    os.environ[secret_name] = response.payload.data.decode("UTF-8")
+
 class LlmClient:
     def __init__(self):
         self.client = AsyncOpenAI(
-            organization=os.environ["OPENAI_ORGANIZATION_ID"],
-            api_key=os.environ["OPENAI_API_KEY"],
+            # organization=os.environ["OPENAI_ORGANIZATION_ID"]  I think this is not needed lets see- Dhruva
+            api_key=get_gcloud_secret("OPEN_AI_API_KEY"),
+           
         )
     @staticmethod
     def query_shopify_for_products(query, first=10):

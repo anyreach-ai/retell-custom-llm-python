@@ -1,9 +1,9 @@
-from typing import Any, List, Optional, Literal, Union
+from typing import Any, List, Optional, Literal, Union, Dict
 from pydantic import BaseModel
-from typing import Literal, Dict, Optional
-
 
 # Retell -> Your Server Events
+
+
 class Utterance(BaseModel):
     role: Literal["agent", "user", "system"]
     content: str
@@ -30,17 +30,16 @@ class ResponseRequiredRequest(BaseModel):
     transcript: List[Utterance]
 
 
-CustomLlmRequest = Union[
-    ResponseRequiredRequest | UpdateOnlyRequest | CallDetailsRequest | PingPongRequest
-]
-
+CustomLlmRequest = ResponseRequiredRequest | UpdateOnlyRequest | CallDetailsRequest | PingPongRequest
 
 # Your Server -> Retell Events
+
+
 class ConfigResponse(BaseModel):
     response_type: Literal["config"] = "config"
     config: Dict[str, bool] = {
-        "auto_reconnect": bool,
-        "call_details": bool,
+        "auto_reconnect": True,
+        "call_details": True,
     }
 
 
@@ -58,4 +57,4 @@ class ResponseResponse(BaseModel):
     transfer_number: Optional[str] = None
 
 
-CustomLlmResponse = Union[ConfigResponse | PingPongResponse | ResponseResponse]
+CustomLlmResponse = ConfigResponse | PingPongResponse | ResponseResponse
